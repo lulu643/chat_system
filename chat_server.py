@@ -25,7 +25,7 @@ class Server:
         # initialize past chat indices
         self.indices = {}
         # sonnet
-        self.sonnet = indexer.PIndex("AllSonnets.txt")
+        self.sonnet = indexer.PIndex("./server_side/AllSonnets.txt")
 
     def new_client(self, sock):
         # add to all sockets and to new clients
@@ -73,7 +73,7 @@ class Server:
     def logout(self, sock):
         # remove sock from all lists
         name = self.logged_sock2name[sock]
-        pkl.dump(self.indices[name], open(name + '.idx', 'wb'))
+        pkl.dump(self.indices[name], open('./log/' + name + '.idx', 'wb'))
         del self.indices[name]
         del self.logged_name2sock[name]
         del self.logged_sock2name[sock]
@@ -149,19 +149,23 @@ class Server:
             # ==============================================================================
             #                 listing available peers
             # ==============================================================================
+            # TODO
             elif msg["action"] == "list":
 
-                msg = str(self.group.members)
-                # msg = "{zz :0, wen ;1, cc :1}
+                msg = self.group.list_all()
                 mysend(from_sock, json.dumps(
                     {"action": "list", "results": msg}))
 
             # ==============================================================================
             #             retrieve a sonnet
             # ==============================================================================
+            # TODO
             elif msg["action"] == "poem":
                 # get the poem
-                poem = self.sonnet.get_poem(int(msg["target"]))
+                from_name = self.logged_sock2name[from_sock]
+                idx = int(msg["target"])
+                print(from_name, 'asks for', idx)
+                poem = self.sonnet.get_poem(idx)
                 poem = '\n'.join(poem).strip()
                 print('here:\n', poem)
                 mysend(from_sock, json.dumps(
@@ -176,10 +180,12 @@ class Server:
 # ==============================================================================
 #                 search: : IMPLEMENT THIS
 # ==============================================================================
+            # TODO
             elif msg["action"] == "search":
 
                 target = msg["target"]
                 from_name = self.logged_sock2name[from_sock]
+                print('search for', from_name, 'for', target)
                 idx = self.indices[from_name]
                 search_rslt = '\n'.join([x[-1] for x in idx.search(target)])
                 print('server side search: ' + search_rslt)

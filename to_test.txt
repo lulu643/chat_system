@@ -1,0 +1,22 @@
+cd ics_project
+python chat_server.py
+python chat_cmdl_client.py
+
+server
+lulu
+levi
+tiffany
+
+who
+
+?smile
+
+c lulu
+
+c levi
+
+hi lulu and levi
+
+bye
+
+q

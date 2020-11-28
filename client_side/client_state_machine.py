@@ -108,11 +108,15 @@ class ClientSM:
                     self.out_msg += " json.loads failed " + str(err)
                     return self.out_msg
 
+                # TODO
                 if peer_msg["action"] == "connect":
-                    # ----------your code here------#
-                    pass
-                    print(peer_msg)
-                    # ----------end of your code----#
+
+                    self.peer = peer_msg["from"]
+                    self.out_msg += 'Request from ' + self.peer + '\n'
+                    self.out_msg += 'You are connected with ' + self.peer
+                    self.out_msg += '. Chat away!\n\n'
+                    self.out_msg += '------------------------------------\n'
+                    self.state = S_CHATTING
 
         # ==============================================================================
         # Start chatting, 'bye' for quit
@@ -145,7 +149,8 @@ class ClientSM:
 
                 else:
                     self.state = S_LOGGEDIN
-                print(peer_msg)
+                    self.out_msg += 'You are disconnected from the chat group\n'
+                    self.out_msg += 'since others all left\n'
 
             #  Display the menu again
             if self.state == S_LOGGEDIN:

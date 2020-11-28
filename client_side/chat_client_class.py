@@ -82,7 +82,7 @@ class Client:
     def read_input(self):
         while True:
             text = sys.stdin.readline()[:-1]
-            self.console_input.append(text) # no need for lock, append is thread safe
+            self.console_input.append(text)  # no need for lock, append is thread safe
 
     def print_instructions(self):
         self.system_msg += menu

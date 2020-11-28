@@ -1,6 +1,7 @@
 S_ALONE = 0
 S_TALKING = 1
 
+
 # ==============================================================================
 # Group class:
 # member fields:
@@ -76,17 +77,17 @@ class Group:
         """
         find myself in the group, quit, but stay in the system
         """
-        for key, value in self.chat_grps.items():
-            if me in value:
-                self.chat_grps[key].remove(me)
-                self.members[me] = S_ALONE
-                break
+        in_group, group_key = self.find_group(me)
+        if in_group:
+            self.chat_grps[group_key].remove(me)
+            self.members[me] = S_ALONE
 
-        if len(self.chat_grps[key]) == 1:
-            peer = self.chat_grps[key][0]
-            del self.chat_grps[key]
-            self.members[peer] = S_ALONE
-            self.grp_ever -= 1
+            # peer may be the only one left as well...
+            if len(self.chat_grps[group_key]) == 1:
+                peer = self.chat_grps[group_key].pop()
+                self.members[peer] = S_ALONE
+                del self.chat_grps[group_key]
+        return
 
     def list_all(self):
         # a simple minded implementation
@@ -107,7 +108,6 @@ class Group:
                 if each != me:
                     my_list.append(each)
         return my_list
-
 
 # if __name__ == "__main__":
 #     g = Group()
