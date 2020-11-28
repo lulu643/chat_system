@@ -19,9 +19,9 @@ S_TALKING = 1
 class Group:
 
     def __init__(self):
-        self.members = {}
-        self.chat_grps = {}
-        self.grp_ever = 0
+        self.members = {}  # key-value pair recording the user's current state
+        self.chat_grps = {}  # mapping group numbers to the list of users
+        self.grp_ever = 0  # to make sure keys are unique
 
     def join(self, name):
         self.members[name] = S_ALONE

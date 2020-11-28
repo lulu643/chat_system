@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Jul  5 11:38:58 2014
-
-@author:
-"""
 import pickle
 
 
@@ -58,14 +53,17 @@ class PIndex(Index):
         roman_int_f.close()
         self.load_poems()
 
-        # load poems
-
+    # load poems
     def load_poems(self):
         lines = open(self.name, 'r').readlines()
         for l in lines:
             self.add_msg_and_index(l.rstrip())
 
     def get_poem(self, p):
+        """
+        :param p: an integer
+        :return: a list, each item is one line of the target sonnet
+        """
         p_str = self.int2roman[p] + '.'
         p_next_str = self.int2roman[p + 1] + '.'
         temp = self.search(p_str)

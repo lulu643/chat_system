@@ -1,19 +1,13 @@
-"""
-Created on Tue Jul 22 00:47:05 2014
-
-@author: alina, zzhang
-"""
-
 import time
 import socket
 import select
 import sys
 import string
-import indexer
+import server_side.indexer as indexer
 import json
 import pickle as pkl
-from chat_utils import *
-import chat_group as grp
+from utils.chat_utils import *
+import server_side.chat_group_student as grp
 
 
 class Server:
@@ -95,7 +89,7 @@ class Server:
         msg = myrecv(from_sock)
         if len(msg) > 0:
             # ==============================================================================
-            # handle connect request this is implemented for you
+            # handle connect request
             # ==============================================================================
             msg = json.loads(msg)
             if msg["action"] == "connect":
@@ -118,31 +112,25 @@ class Server:
                     msg = json.dumps(
                         {"action": "connect", "status": "no-user"})
                 mysend(from_sock, msg)
-# ==============================================================================
-# handle messeage exchange: IMPLEMENT THIS
-# ==============================================================================
+
+            # ==============================================================================
+            # handle message exchange
+            # ==============================================================================
             elif msg["action"] == "exchange":
                 from_name = self.logged_sock2name[from_sock]
-                """
-                Finding the list of people to send to and index message
-                """
-                # IMPLEMENTATION
-                # ---- start your code ---- #
-                pass
 
-                # ---- end of your code --- #
+                # index the message
+                index = self.indices[from_name]
+                to_index = text_proc(msg["message"], from_name)
+                index.add_msg_and_index(to_index)
 
+                # send the message to group members and index the message
                 the_guys = self.group.list_me(from_name)[1:]
                 for g in the_guys:
                     to_sock = self.logged_name2sock[g]
-
-                    # IMPLEMENTATION
-                    # ---- start your code ---- #
-                    pass
-                    mysend(
-                        to_sock, "...Remember to index the messages before sending, or search won't work")
-
-                    # ---- end of your code --- #
+                    self.indices[g].add_msg_and_index(to_index)
+                    mysend(to_sock, json.dumps(
+                        {"action": "exchange", "from": msg["from"], "message": msg["message"]}))
 
 # ==============================================================================
 # the "from" guy has had enough (talking to "to")!
@@ -157,32 +145,25 @@ class Server:
                     to_sock = self.logged_name2sock[g]
                     mysend(to_sock, json.dumps(
                         {"action": "disconnect", "msg": "everyone left, you are alone"}))
-# ==============================================================================
-#                 listing available peers: IMPLEMENT THIS
-# ==============================================================================
+
+            # ==============================================================================
+            #                 listing available peers
+            # ==============================================================================
             elif msg["action"] == "list":
 
-                # IMPLEMENTATION
-                # ---- start your code ---- #
-                pass
-                msg = "...needs to use self.group functions to work"
-
-                # ---- end of your code --- #
+                msg = str(self.group.members)
+                # msg = "{zz :0, wen ;1, cc :1}
                 mysend(from_sock, json.dumps(
                     {"action": "list", "results": msg}))
-# ==============================================================================
-#             retrieve a sonnet : IMPLEMENT THIS
-# ==============================================================================
+
+            # ==============================================================================
+            #             retrieve a sonnet
+            # ==============================================================================
             elif msg["action"] == "poem":
-
-                # IMPLEMENTATION
-                # ---- start your code ---- #
-                pass
-                poem = "...needs to use self.sonnet functions to work"
+                # get the poem
+                poem = self.sonnet.get_poem(int(msg["target"]))
+                poem = '\n'.join(poem).strip()
                 print('here:\n', poem)
-
-                # ---- end of your code --- #
-
                 mysend(from_sock, json.dumps(
                     {"action": "poem", "results": poem}))
 # ==============================================================================
@@ -197,19 +178,17 @@ class Server:
 # ==============================================================================
             elif msg["action"] == "search":
 
-                # IMPLEMENTATION
-                # ---- start your code ---- #
-                pass
-                search_rslt = "needs to use self.indices search to work"
+                target = msg["target"]
+                from_name = self.logged_sock2name[from_sock]
+                idx = self.indices[from_name]
+                search_rslt = '\n'.join([x[-1] for x in idx.search(target)])
                 print('server side search: ' + search_rslt)
-
-                # ---- end of your code --- #
                 mysend(from_sock, json.dumps(
                     {"action": "search", "results": search_rslt}))
 
-# ==============================================================================
-#                 the "from" guy really, really has had enough
-# ==============================================================================
+            # ==============================================================================
+            #                 the "from" guy really, really has had enough
+            # ==============================================================================
 
         else:
             # client died unexpectedly

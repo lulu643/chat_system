@@ -1,5 +1,4 @@
-
-from chat_client_class import *
+from client_side.chat_client_class import *
 
 
 def main():

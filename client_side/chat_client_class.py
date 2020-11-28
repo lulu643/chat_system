@@ -3,8 +3,8 @@ import socket
 import select
 import sys
 import json
-from chat_utils import *
-import client_state_machine as csm
+from utils.chat_utils import *
+import client_side.client_state_machine as csm
 
 import threading
 
@@ -27,8 +27,8 @@ class Client:
         return self.name
 
     def init_chat(self):
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM )
-        svr = SERVER if self.args.d == None else (self.args.d, CHAT_PORT)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        svr = SERVER if self.args.d is None else (self.args.d, CHAT_PORT)
         self.socket.connect(svr)
         self.sm = csm.ClientSM(self.socket)
         reading_thread = threading.Thread(target=self.read_input)
@@ -48,7 +48,7 @@ class Client:
         read, write, error = select.select([self.socket], [], [], 0)
         my_msg = ''
         peer_msg = []
-        #peer_code = M_UNDEF    for json data, peer_code is redundant
+        # peer_code = M_UNDEF    for json data, peer_code is redundant
         if len(self.console_input) > 0:
             my_msg = self.console_input.pop(0)
         if self.socket in read:
