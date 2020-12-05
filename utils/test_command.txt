@@ -1,6 +1,6 @@
 cd ics_project
-python3.9 chat_server.py
-python3.9 chat_client_class.py
+python chat_server.py
+python chat_cmdl_client.py
 
 server
 lulu
