@@ -1,11 +1,12 @@
 cd ics_project
-python chat_server.py
-python chat_cmdl_client.py
+python3.9 chat_server.py
+python3.9 chat_cmdl_client.py
 
 server
 lulu
-levi
-tiffany
+lulu2
+lulu3
+
 
 who
 
@@ -13,9 +14,9 @@ who
 
 c lulu
 
-c levi
+c lulu2
 
-hi lulu and levi
+hi lulu and lulu2
 
 bye
 
