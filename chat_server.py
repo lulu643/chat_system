@@ -9,7 +9,7 @@ import pickle as pkl
 from utils.chat_utils import *
 import server_side.chat_group_student as grp
 
-
+  
 class Server:
     def __init__(self):
         self.new_clients = []  # list of new sockets of which the user id is not known
