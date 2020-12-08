@@ -61,7 +61,7 @@ def myrecv(s):
         text = s.recv(SIZE_SPEC - len(size)).decode()
         if not text:
             print('disconnected')
-            return ('')
+            return ''
         size += text
     size = int(size)
     # now receive message

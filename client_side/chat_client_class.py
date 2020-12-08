@@ -7,8 +7,6 @@ from client_side.linked_queue import LinkedQueue
 from utils.chat_utils import *
 import client_side.client_state_machine as csm
 from tkinter import *
-from tkinter import font
-from tkinter import ttk
 
 import threading
 
@@ -22,8 +20,8 @@ class Client:
         self.local_msg = ''
         self.peer_msg = ''
         self.args = args
-        self.queue_input = LinkedQueue()
-        self.queue_output = LinkedQueue()
+        self.name = ''
+        self.init_chat()
 
     def quit(self):
         self.socket.shutdown(socket.SHUT_RDWR)
@@ -37,9 +35,9 @@ class Client:
         svr = SERVER if self.args.d is None else (self.args.d, CHAT_PORT)
         self.socket.connect(svr)
         self.sm = csm.ClientSM(self.socket)
-        reading_thread = threading.Thread(target=self.read_input)
-        reading_thread.daemon = True
-        reading_thread.start()
+        # reading_thread = threading.Thread(target=self.read_input)
+        # reading_thread.daemon = True
+        # reading_thread.start()
 
     def shutdown_chat(self):
         return
@@ -61,36 +59,25 @@ class Client:
             peer_msg = self.recv()
         return my_msg, peer_msg
 
-    def output(self):
-        if len(self.system_msg) > 0:
-            self.queue_output.enqueue(self.system_msg)
-            self.system_msg = ''
-
-    def login_or_not(self):
-        my_msg, peer_msg = self.get_msgs()
-        if len(my_msg) > 0:
-            self.name = my_msg
+    # TODO: 出了点问题，现在无法login第二个用户
+    def login_or_not(self, name):
+        # my_msg, peer_msg = self.get_msgs()
+        if len(name) > 0:
             msg = json.dumps({"action": "login", "name": self.name})
             self.send(msg)
             response = json.loads(self.recv())
             if response["status"] == 'ok':
+                self.name = name
                 self.state = S_LOGGEDIN
                 self.sm.set_state(S_LOGGEDIN)
                 self.sm.set_myname(self.name)
-                self.print_instructions()
                 return True
             elif response["status"] == 'duplicate':
-                self.system_msg += 'Duplicate username, try again'
+                # self.system_msg += 'Duplicate username, try again'
+                print('duplicate username')
                 return False
         else:               # fix: dup is only one of the reasons
-           return False
-
-    def read_input(self):
-        while True:
-            if not self.queue_input.is_empty():
-                text = self.queue_input.dequeue()
-                self.box_input.append(text)  # no need for lock, append is thread safe
-                time.sleep(CHAT_WAIT)
+            return False
 
     def print_instructions(self):
         self.system_msg += menu
@@ -107,9 +94,9 @@ class GUI(Client):
 
     # constructor method
     def __init__(self, args):
-
         # chat window which is currently hidden
         super().__init__(args)
+
         self.Window = Tk()
         self.Window.withdraw()
 
@@ -164,21 +151,16 @@ class GUI(Client):
         self.Window.mainloop()
 
     def goAhead(self, name):
-        self.login.destroy()
-        self.layout(name)
-
-        # the thread to receive messages
-        rcv = threading.Thread(target=self.receive)
-        rcv.start()
-
-        # the thread to start
-        runchat = threading.Thread(target=self.run_chat)
-        runchat.start()
+        if self.login_or_not(name):
+            self.login.destroy()
+            self.layout()
+            runchat = threading.Thread(target=self.run_chat)
+            runchat.start()
 
     # The main layout of the chat
-    def layout(self, name):
+    def layout(self):
 
-        self.name = name
+        # self.name = name
         # to show chat window
         self.Window.deiconify()
         self.Window.title("CHATROOM")
@@ -273,33 +255,25 @@ class GUI(Client):
         snd.start()
 
     # function to receive messages
-    def receive(self):
-        while True:
-            if not self.queue_output.is_empty():
-                # insert messages to text box
-                self.textCons.config(state=NORMAL)
-                self.textCons.insert(END,
-                                     self.queue_output.dequeue() + "\n\n")
-
-                self.textCons.config(state=DISABLED)
-                self.textCons.see(END)
-                time.sleep(CHAT_WAIT)
+    def output(self):
+        if len(self.system_msg) > 0:
+            self.textCons.config(state=NORMAL)
+            self.textCons.insert(END,
+                                 self.system_msg + "\n\n")
+            self.textCons.config(state=DISABLED)
+            self.textCons.see(END)
+            self.system_msg = ''
 
     # function to send messages
     def sendMessage(self):
         self.textCons.config(state=DISABLED)
         while True:
-            self.queue_input.enqueue(self.msg)
+            self.box_input.append(self.msg)  # no need for lock, append is thread safe
             break
 
     def run_chat(self):
-        self.init_chat()
-        self.system_msg += 'Welcome to ICS chat\n'
-        self.system_msg += 'Please enter your name: '
-        self.output()
-        while self.login_or_not() != True:
-            self.output()
-        self.system_msg += 'Welcome, ' + self.get_name() + '!'
+        self.system_msg += 'Welcome to ICS chat, ' + self.get_name() + '!'
+        self.print_instructions()
         self.output()
         while self.sm.get_state() != S_OFFLINE:
             self.proc()
