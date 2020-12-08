@@ -90,6 +90,7 @@ class Client:
             if not self.queue_input.is_empty():
                 text = self.queue_input.dequeue()
                 self.box_input.append(text)  # no need for lock, append is thread safe
+                time.sleep(CHAT_WAIT)
 
     def print_instructions(self):
         self.system_msg += menu
@@ -282,6 +283,7 @@ class GUI(Client):
 
                 self.textCons.config(state=DISABLED)
                 self.textCons.see(END)
+                time.sleep(CHAT_WAIT)
 
     # function to send messages
     def sendMessage(self):
