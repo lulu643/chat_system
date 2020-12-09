@@ -9,3 +9,4 @@
 *.idx
 build_GUI/interface.py
 __pycache__
+venv
