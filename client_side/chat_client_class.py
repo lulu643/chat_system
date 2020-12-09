@@ -35,9 +35,6 @@ class Client:
         svr = SERVER if self.args.d is None else (self.args.d, CHAT_PORT)
         self.socket.connect(svr)
         self.sm = csm.ClientSM(self.socket)
-        # reading_thread = threading.Thread(target=self.read_input)
-        # reading_thread.daemon = True
-        # reading_thread.start()
 
     def shutdown_chat(self):
         return
@@ -59,11 +56,10 @@ class Client:
             peer_msg = self.recv()
         return my_msg, peer_msg
 
-    # TODO: 出了点问题，现在无法login第二个用户
     def login_or_not(self, name):
         # my_msg, peer_msg = self.get_msgs()
         if len(name) > 0:
-            msg = json.dumps({"action": "login", "name": self.name})
+            msg = json.dumps({"action": "login", "name": name})
             self.send(msg)
             response = json.loads(self.recv())
             if response["status"] == 'ok':
@@ -156,6 +152,15 @@ class GUI(Client):
             self.layout()
             runchat = threading.Thread(target=self.run_chat)
             runchat.start()
+        else:
+            self.pls = Label(self.login,
+                             text="Duplicate username, try again",
+                             justify=CENTER,
+                             font="Helvetica 14 bold")
+
+            self.pls.place(relheight=0.15,
+                           relx=0.2,
+                           rely=0.07)
 
     # The main layout of the chat
     def layout(self):
