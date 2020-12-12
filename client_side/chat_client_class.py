@@ -160,6 +160,18 @@ class GUI(Client):
                            relx=0.2,
                            rely=0.07)
 
+    def clock(self):
+        hour = time.strftime('%H')
+        minute = time.strftime('%M')
+        second = time.strftime('%S')
+
+        clock_label = tk.Label(self.Window, text='', font=('Helvetica', 18))
+        clock_label.place
+        pass
+
+    def main_menu(self):
+        pass
+
     # The main layout of the chat
     def layout(self):
         # to show chat window
@@ -169,7 +181,7 @@ class GUI(Client):
         canvas = tk.Canvas(self.Window, height=500, width=600)
         canvas.pack()
 
-        background_image = tk.PhotoImage(file='/Users/nyu/Desktop/ics_project/images/landscape.png')
+        background_image = tk.PhotoImage(file='/Users/nyu/Desktop/ics_project/images/nyushanghai.png')
         background_label = tk.Label(self.Window)
         background_label.image = background_image
         background_label.configure(image=background_image)
