@@ -3,7 +3,6 @@ import socket
 import select
 import sys
 import json
-from client_side.linked_queue import LinkedQueue
 from utils.chat_utils import *
 import client_side.client_state_machine as csm
 import tkinter as tk
@@ -21,10 +20,6 @@ class Client:
         self.args = args
         self.name = ''
         self.init_chat()
-
-    def quit(self):
-        self.socket.shutdown(socket.SHUT_RDWR)
-        self.socket.close()
 
     def get_name(self):
         return self.name
@@ -164,13 +159,10 @@ class GUI(Client):
         hour = time.strftime('%H')
         minute = time.strftime('%M')
         second = time.strftime('%S')
+        day = time.strftime('%A')
 
-        clock_label = tk.Label(self.Window, text='', font=('Helvetica', 18))
-        clock_label.place
-        pass
-
-    def main_menu(self):
-        pass
+        self.clock_label.config(text=f'{day}   {hour}:{minute}:{second} ')
+        self.clock_label.after(1000, self.clock)
 
     # The main layout of the chat
     def layout(self):
@@ -186,6 +178,12 @@ class GUI(Client):
         background_label.image = background_image
         background_label.configure(image=background_image)
         background_label.place(relwidth=1, relheight=1)
+
+        # label of a clock to show time
+        self.clock_label = tk.Label(self.Window, text='', font='Helvetica 15')
+        self.clock_label.place(relx=0.642, rely=0.055)
+
+        self.clock()
 
         # frame to displays messages
         frame = tk.Frame(self.Window, bg='#80c1ff', bd=10)
@@ -204,6 +202,11 @@ class GUI(Client):
         self.buttonMsg = tk.Button(lower_frame, text="send", font=40,
                                    command=lambda: self.sendButton(self.entryMsg.get()))
         self.buttonMsg.place(relx=0.8, relheight=1, relwidth=0.2)
+
+        # the quit button
+        self.buttonQuit = tk.Button(self.Window, text="quit", font=40,
+                                   command=lambda: self.quitbutton_act())
+        self.buttonQuit.place(relx=0.6, rely=0.055, anchor='n')
 
         # to display text
         self.textCons = tk.Text(frame,
@@ -229,11 +232,25 @@ class GUI(Client):
 
     # function to basically start the thread for sending messages
     def sendButton(self, msg):
+        if self.sm.get_state() == S_CHATTING:
+            # the two playger game start button
+            self.buttonGame = tk.Button(self.Window, text="game", font=40, highlightbackground='#FFFF00',
+                                        command=lambda: self.two_player_game_act())
+            self.buttonGame.place(relx=0.52, rely=0.055, anchor='n')
+
+        elif msg == 'bye':
+            self.buttonGame.destroy()
         self.textCons.config(state=tk.DISABLED)
         self.msg = msg
         self.entryMsg.delete(0, tk.END)
         snd = threading.Thread(target=self.sendMessage)
         snd.start()
+
+    def quitbutton_act(self):
+        self.sendButton('q')
+
+    def two_player_game_act(self):
+        self.sendButton('game')
 
     # function to receive messages
     def output(self):
@@ -261,3 +278,9 @@ class GUI(Client):
             self.output()
             time.sleep(CHAT_WAIT)
         self.quit()
+        self.Window.quit()
+
+    def quit(self):
+        self.socket.shutdown(socket.SHUT_RDWR)
+        self.socket.close()
+

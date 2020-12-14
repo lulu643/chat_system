@@ -14,6 +14,9 @@ background_image = tk.PhotoImage(file='/Users/nyu/Desktop/ics_project/images/lan
 background_label = tk.Label(Window, image=background_image)
 background_label.place(relwidth=1, relheight=1)
 
+buttonGame = tk.Button(Window, highlightbackground='#FFB6C1', text="game", font=40)
+buttonGame.place(relx=0.52, rely=0.055, anchor='n')
+
 # frame to displays messages
 frame = tk.Frame(Window, bg='#80c1ff', bd=10)
 frame.place(relx=0.5, rely=0.1, relwidth=0.75, relheight=0.6, anchor='n')

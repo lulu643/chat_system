@@ -149,8 +149,8 @@ class ClientSM:
 
                 else:
                     self.state = S_LOGGEDIN
-                    self.out_msg += 'You are disconnected from the chat group\n'
-                    self.out_msg += 'since others all left\n'
+                    self.out_msg += peer_msg["msg"]
+                    self.peer = ''
 
             #  Display the menu again
             if self.state == S_LOGGEDIN:
