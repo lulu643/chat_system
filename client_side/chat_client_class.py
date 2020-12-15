@@ -173,7 +173,7 @@ class GUI(Client):
         canvas = tk.Canvas(self.Window, height=500, width=600)
         canvas.pack()
 
-        background_image = tk.PhotoImage(file='/Users/nyu/Desktop/ics_project/images/nyushanghai.png')
+        background_image = tk.PhotoImage(file='/Users/nyu/Desktop/ics_project/background images/nyushanghai.png')
         background_label = tk.Label(self.Window)
         background_label.image = background_image
         background_label.configure(image=background_image)
