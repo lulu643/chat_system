@@ -79,9 +79,7 @@ class Client:
         my_msg, peer_msg = self.get_msgs()
         self.system_msg += self.sm.proc(my_msg, peer_msg)
 
-
 class GUI(Client):
-
     # constructor method
     def __init__(self, args):
         # chat window which is currently hidden
@@ -139,6 +137,17 @@ class GUI(Client):
                       rely=0.55)
         self.Window.mainloop()
 
+    # to display a clock
+    def clock(self):
+        hour = time.strftime('%H')
+        minute = time.strftime('%M')
+        second = time.strftime('%S')
+        day = time.strftime('%A')
+
+        self.clock_label.config(text=f'{day}   {hour}:{minute}:{second} ')
+        self.clock_label.after(1000, self.clock)
+
+    # if successfully login, destroy the login window
     def goAhead(self, name):
         if self.login_or_not(name):
             self.login.destroy()
@@ -154,15 +163,6 @@ class GUI(Client):
             self.pls.place(relheight=0.15,
                            relx=0.2,
                            rely=0.07)
-
-    def clock(self):
-        hour = time.strftime('%H')
-        minute = time.strftime('%M')
-        second = time.strftime('%S')
-        day = time.strftime('%A')
-
-        self.clock_label.config(text=f'{day}   {hour}:{minute}:{second} ')
-        self.clock_label.after(1000, self.clock)
 
     # The main layout of the chat
     def layout(self):
@@ -205,8 +205,23 @@ class GUI(Client):
 
         # the quit button
         self.buttonQuit = tk.Button(self.Window, text="quit", font=40,
-                                   command=lambda: self.quitbutton_act())
+                                   command=lambda: self.sendButton('q'))
         self.buttonQuit.place(relx=0.6, rely=0.055, anchor='n')
+
+        # the Snake Game button
+        self.buttonGame1 = tk.Button(self.Window, text="Snake Game", font="Helvetica 13 bold", fg='#DC143C',
+                                   command=lambda: self.sendButton("Snake Game"))
+        self.buttonGame1.place(relx=0.28, rely=0.055, anchor='n')
+
+        # the Go Bang button
+        self.buttonGame2 = tk.Button(self.Window, text="Go Bang", font="Helvetica 13 bold", fg='#DC143C',
+                                   command=lambda: self.sendButton("Go Bang"))
+        self.buttonGame2.place(relx=0.415, rely=0.055, anchor='n')
+
+        # the Kill Final button
+        self.buttonGame3 = tk.Button(self.Window, text="Kill Final", font="Helvetica 13 bold", fg='#DC143C',
+                                   command=lambda: self.sendButton("Kill Final"))
+        self.buttonGame3.place(relx=0.52, rely=0.055, anchor='n')
 
         # to display text
         self.textCons = tk.Text(frame,
@@ -230,29 +245,22 @@ class GUI(Client):
 
         self.textCons.config(state=tk.DISABLED)
 
-    # function to basically start the thread for sending messages
+    # Start a thread for sending messages
     def sendButton(self, msg):
-        if self.sm.get_state() == S_CHATTING:
-            # the two playger game start button
-            self.buttonGame = tk.Button(self.Window, text="game", font=40, highlightbackground='#FFFF00',
-                                        command=lambda: self.two_player_game_act())
-            self.buttonGame.place(relx=0.52, rely=0.055, anchor='n')
-
-        elif msg == 'bye':
-            self.buttonGame.destroy()
         self.textCons.config(state=tk.DISABLED)
         self.msg = msg
         self.entryMsg.delete(0, tk.END)
         snd = threading.Thread(target=self.sendMessage)
         snd.start()
 
-    def quitbutton_act(self):
-        self.sendButton('q')
+    # function to send messages
+    def sendMessage(self):
+        self.textCons.config(state=tk.DISABLED)
+        while True:
+            self.box_input.append(self.msg)
+            break
 
-    def two_player_game_act(self):
-        self.sendButton('game')
-
-    # function to receive messages
+    # function to display messages
     def output(self):
         if len(self.system_msg) > 0:
             self.textCons.config(state=tk.NORMAL)
@@ -261,13 +269,6 @@ class GUI(Client):
             self.textCons.config(state=tk.DISABLED)
             self.textCons.see(tk.END)
             self.system_msg = ''
-
-    # function to send messages
-    def sendMessage(self):
-        self.textCons.config(state=tk.DISABLED)
-        while True:
-            self.box_input.append(self.msg)  # no need for lock, append is thread safe
-            break
 
     def run_chat(self):
         self.system_msg += 'Welcome to ICS chat, ' + self.get_name() + '!'
@@ -280,6 +281,7 @@ class GUI(Client):
         self.quit()
         self.Window.quit()
 
+    # shutdown the socket
     def quit(self):
         self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
